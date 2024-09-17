@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/app/hooks/useAuth';
 
 export function AuthGuard({ isPrivate }: { isPrivate: boolean }) {
   const { signedIn } = useAuth();
