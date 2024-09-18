@@ -1,7 +1,7 @@
 import { DAYSOFWEEK } from '@/app/config/constants';
 import { ITimeOperating } from '@/app/entities/IOperatingHour';
 import { useOperatingHours } from '@/app/hooks/useOperatingHours';
-import { formatTime } from '@/app/utils/formatTime';
+import { formatTime } from '@/app/lib/utils';
 
 export function OperatingHours() {
   const { operatingHours } = useOperatingHours();

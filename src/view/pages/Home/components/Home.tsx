@@ -15,9 +15,6 @@ export function HomeContent() {
   const { workingDays, isLoading } = useWorkingDays();
   const { handleSelectWorkingDayId, selectWorkingDayId } = useHome();
 
-  const isTabletOrDesktopOrLaptop = useMediaQuery({
-    query: '(min-width: 768px)',
-  });
   const isDesktopOrLaptop = useMediaQuery({
     query: '(min-width: 1024px)',
   });
@@ -44,7 +41,7 @@ export function HomeContent() {
 
   return (
     <div className="mt-10 flex flex-col items-center justify-center px-4">
-      {isTabletOrDesktopOrLaptop ? (
+      {isDesktopOrLaptop ? (
         <div className="mt-5 mb-4 p-3">
           <div className="flex items-center gap-2">
             {/* Botão de voltar, desativado se estiver no primeiro bloco */}

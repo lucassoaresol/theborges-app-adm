@@ -8,26 +8,29 @@ interface ICreateClientDTO {
 }
 
 interface IParamsListClientDTO {
-  search: string;
-  take: number;
+  pageParam?: number;
+  limit?: number;
 }
 
 export class ClientService {
-  static async createClient({ name, phone }: ICreateClientDTO) {
+  static async create({ name, phone }: ICreateClientDTO) {
     const { data } = await httpClient.post<IClient>('/clients', { name, phone });
 
     return data;
   }
 
-  static async getAll({ search, take }: IParamsListClientDTO) {
-    const { data } = await httpClient.get<{ result: IClient[] }>('/clients', {
-      params: { search, take },
-    });
+  static async getAll({ pageParam = 0, limit = 20 }: IParamsListClientDTO) {
+    const { data } = await httpClient.get<{ result: IClient[]; hasMore: boolean }>(
+      '/clients',
+      {
+        params: { skip: pageParam, limit },
+      },
+    );
 
-    return data.result;
+    return data;
   }
 
-  static async retrieveClient(id: number) {
+  static async get(id: string) {
     const { data } = await httpClient.get<{ result: IClient }>(`/clients/${id}`);
 
     return data.result;
