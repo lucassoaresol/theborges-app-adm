@@ -57,7 +57,7 @@ export function DayHourAdmStep() {
   );
 
   async function handleNextStep() {
-    const isValid = await form.trigger('serviceAddStep', {
+    const isValid = await form.trigger('dayHourStep', {
       shouldFocus: true,
     });
 
@@ -120,6 +120,7 @@ export function DayHourAdmStep() {
             selected={selectedDate}
             onSelect={(date) => {
               setSelectedDate(date);
+              form.setValue('dayHourStep.startTime', 0);
             }}
             weekStartsOn={1}
           />

@@ -16,7 +16,7 @@ import { Button } from '../../ui/Button';
 import { NewClientStep } from '../NewClientStep/All';
 
 const schema = z.object({
-  phone: z.string().default(''),
+  phone: z.string().min(2, 'O Whatsapp informado é inválido'),
   phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
 });
 

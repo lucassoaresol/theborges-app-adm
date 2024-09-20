@@ -57,12 +57,13 @@ export function PhoneInput() {
       if (name === 'phone' && phone.length >= 13) {
         verifyPhone(phone)
           .then(() => clearErrors('phoneData'))
-          .catch(() =>
+          .catch(() => {
             setError('phoneData', {
               type: 'validate',
               message: 'O Whatsapp informado é inválido',
-            }),
-          );
+            });
+            setValue('phone', '');
+          });
       }
     });
 

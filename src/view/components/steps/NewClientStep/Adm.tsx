@@ -17,7 +17,7 @@ import { Label } from '../../ui/Label';
 
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
-  phone: z.string().default(''),
+  phone: z.string().min(2, 'O Whatsapp informado é inválido'),
   phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
 });
 

@@ -12,7 +12,7 @@ import { WorkingDaysService } from '@/app/services/WorkingDaysService';
 import { FormData } from '@/view/pages/BookingAdm';
 
 import { StepHeader } from '../../StepHeader';
-import { StepperFooter, StepperNextButton, StepperPreviousButton } from '../../Stepper';
+import { StepperFooter, StepperNextButton } from '../../Stepper';
 import { useStepper } from '../../Stepper/useStepper';
 import { Button } from '../../ui/Button';
 import { Calendar } from '../../ui/Calendar';
@@ -57,7 +57,7 @@ export function DayHourBookingAdmStep() {
   );
 
   async function handleNextStep() {
-    const isValid = await form.trigger('confirmedStep.services', {
+    const isValid = await form.trigger('dayHourStep', {
       shouldFocus: true,
     });
 
@@ -120,6 +120,7 @@ export function DayHourBookingAdmStep() {
             selected={selectedDate}
             onSelect={(date) => {
               setSelectedDate(date);
+              form.setValue('dayHourStep.startTime', 0);
             }}
             weekStartsOn={1}
           />
@@ -156,7 +157,6 @@ export function DayHourBookingAdmStep() {
         )}
       />
       <StepperFooter>
-        <StepperPreviousButton disabled={form.formState.isSubmitting} />
         <StepperNextButton onClick={handleNextStep} />
       </StepperFooter>
     </div>
