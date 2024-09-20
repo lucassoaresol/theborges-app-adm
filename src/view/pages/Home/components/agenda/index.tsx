@@ -1,18 +1,146 @@
 /* eslint-disable react/no-array-index-key */
-import { useMemo } from 'react';
+import {
+  KeyboardEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
 
+import { ITime } from '@/app/entities/IOperatingHour';
 import dayLib from '@/app/lib/dayjs';
 
 import { useHome } from '../../useHome';
 
 import { Header } from './Header';
 
+interface IBooking {
+  id: number;
+  start: number;
+  end: number;
+  client: string;
+  services: string;
+  color: string;
+}
+
 export function Agenda() {
   const { selectWorkingDay } = useHome();
+  const [newBookingTime, setNewBookingTime] = useState<string | null>(null);
+  const [nowPosition, setNowPosition] = useState<number | null>(null); // Estado para a posição da linha de "agora"
+
+  console.log(newBookingTime);
+
   const today = selectWorkingDay
     ? dayLib(selectWorkingDay.date).startOf('day')
     : dayLib();
+
+  const calculateClickTime = (
+    clickY: number,
+    agendaHeight: number,
+    startTime: number,
+  ): number => {
+    const totalMinutesInDay = selectWorkingDay!.time.end - selectWorkingDay!.time.start; // Total de minutos no expediente
+    const clickPercentage = clickY / agendaHeight; // Posição percentual do clique
+    const clickedMinutes = Math.floor(totalMinutesInDay * clickPercentage); // Minutos totais clicados
+
+    return startTime + clickedMinutes;
+  };
+
+  const calculateNowPosition = useCallback(() => {
+    if (!selectWorkingDay) return null;
+
+    const now = dayLib();
+    const startOfDay = today.add(selectWorkingDay.time.start, 'm');
+
+    if (now.isBefore(startOfDay)) {
+      return 0; // Antes do horário de expediente
+    }
+
+    const minutesSinceStart = now.diff(startOfDay, 'minutes');
+    const totalMinutesInDay = selectWorkingDay.time.end - selectWorkingDay.time.start;
+
+    if (minutesSinceStart > totalMinutesInDay) {
+      return null; // Após o expediente
+    }
+
+    // Calcular a posição em pixels da linha de "agora"
+    return (minutesSinceStart / totalMinutesInDay) * (totalMinutesInDay / 60) * 350;
+  }, [selectWorkingDay, today]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNowPosition(calculateNowPosition());
+    }, 60000); // Atualiza a cada 1 minuto
+
+    // Calcular a posição inicial da linha de "agora"
+    setNowPosition(calculateNowPosition());
+
+    // Limpar o intervalo quando o componente for desmontado
+    return () => clearInterval(intervalId);
+  }, [calculateNowPosition, selectWorkingDay, today]);
+
+  const handleAgendaClick = (e: MouseEvent<HTMLDivElement>) => {
+    const agendaRect = e.currentTarget.getBoundingClientRect();
+    const clickY = e.clientY - agendaRect.top;
+    const agendaHeight = agendaRect.height;
+
+    // Calcular o horário baseado na posição do clique
+    const clickedTime = calculateClickTime(
+      clickY,
+      agendaHeight,
+      selectWorkingDay!.time.start,
+    );
+
+    // Verificar se clicou em um horário sem agendamento ou bloqueio
+    const hasBookingOrBreak =
+      selectWorkingDay!.bookings.some(
+        (booking: IBooking) =>
+          clickedTime >= booking.start && clickedTime < booking.end,
+      ) ||
+      selectWorkingDay!.time.breaks.some(
+        (breakTime: ITime) =>
+          clickedTime >= breakTime.start && clickedTime < breakTime.end,
+      );
+
+    if (!hasBookingOrBreak) {
+      // Armazenar o horário clicado e abrir o modal
+      setNewBookingTime(today.add(clickedTime, 'm').format('HH:mm'));
+      // setModalOpen(true);
+    }
+  };
+
+  const handleAgendaKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    // Verificar se a tecla pressionada é "Enter"
+    if (e.key === 'Enter') {
+      const agendaRect = e.currentTarget.getBoundingClientRect();
+      const agendaHeight = agendaRect.height;
+      const clickY = agendaHeight / 2; // Simular um clique no meio da agenda, já que não temos posição de cursor no teclado.
+
+      const clickedTime = calculateClickTime(
+        clickY,
+        agendaHeight,
+        selectWorkingDay!.time.start,
+      );
+
+      const hasBookingOrBreak =
+        selectWorkingDay!.bookings.some(
+          (booking: IBooking) =>
+            clickedTime >= booking.start && clickedTime < booking.end,
+        ) ||
+        selectWorkingDay!.time.breaks.some(
+          (breakTime: ITime) =>
+            clickedTime >= breakTime.start && clickedTime < breakTime.end,
+        );
+
+      if (!hasBookingOrBreak) {
+        setNewBookingTime(today.add(clickedTime, 'm').format('HH:mm'));
+        // setModalOpen(true);
+      }
+    }
+  };
+
   const generateHourRange = (start: number, end: number) => {
     const hours = [];
     let current = today.add(start, 'm');
@@ -59,7 +187,11 @@ export function Agenda() {
         <div className="relative w-full max-w-2xl bg-secondary rounded-lg border">
           {/* Altura dinâmica da agenda com base no expediente */}
           <div
+            role="button"
             className="relative"
+            onClick={handleAgendaClick}
+            onKeyDown={handleAgendaKeyDown}
+            tabIndex={0}
             style={{
               height: calculateAgendaHeight(
                 selectWorkingDay.time.start,
@@ -127,6 +259,21 @@ export function Agenda() {
                   </div>
                 </div>
               ))}
+
+            {/* Linha de "agora" */}
+            {dayLib(selectWorkingDay.date).isSame(dayLib(), 'day') &&
+              nowPosition !== null && (
+                <div
+                  className="absolute left-0 w-full h-[2px] bg-red-500"
+                  style={{
+                    top: `${nowPosition}px`,
+                  }}
+                >
+                  <div className="absolute left-4 bg-red-500 text-white px-2 py-1 rounded">
+                    Agora
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>
