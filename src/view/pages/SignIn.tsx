@@ -48,7 +48,7 @@ export function SignIn() {
             errors={errors}
             name="username"
             render={({ message }) => (
-              <small className="text-red-400 block">{message}</small>
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
             )}
           />
         </div>
@@ -60,7 +60,7 @@ export function SignIn() {
             errors={errors}
             name="password"
             render={({ message }) => (
-              <small className="text-red-400 block">{message}</small>
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
             )}
           />
         </div>

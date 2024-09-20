@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import dayLib from '@/app/lib/dayjs';
 import { BookingService } from '@/app/services/BookingService';
-import { FormData } from '@/view/pages/Booking';
+import { FormData } from '@/view/pages/NewClient';
 
 import { StepHeader } from '../../StepHeader';
 import { StepperFooter, StepperPreviousButton } from '../../Stepper';
@@ -28,13 +28,15 @@ function getFormattedDate(startDateTime: Dayjs): string {
   return `${startDateTime.format('DD/MM/YYYY')} às ${startDateTime.format('HH:mm')}`;
 }
 
-export function ConfirmedStep() {
+export function ConfirmedClientStep() {
   const navigate = useNavigate();
   const [isCreate, setIsCreate] = useState(false);
   const form = useFormContext<FormData>();
 
   const hour = getFormattedDate(
-    dayLib().startOf('day').add(form.getValues('dayHourStep.startTime'), 'm'),
+    dayLib(form.getValues('dayHourStep.date'))
+      .startOf('day')
+      .add(form.getValues('dayHourStep.startTime'), 'm'),
   );
 
   let totalPrice = 0;
@@ -48,7 +50,7 @@ export function ConfirmedStep() {
 
       <div>
         <div className="mb-4">
-          <strong>Cliente:</strong> {form.getValues('clientAdmStep.name')}
+          <strong>Cliente:</strong> {form.getValues('confirmedStep.clientName')}
         </div>
         <div className="mb-4">
           <strong>Data e Hora:</strong> {hour}
@@ -63,7 +65,6 @@ export function ConfirmedStep() {
                 <li key={service.name}>
                   {service.name} -{' '}
                   <span className="font-semibold">
-                    R${' '}
                     {service.price.toLocaleString('pt-BR', {
                       style: 'currency',
                       currency: 'BRL',
@@ -76,10 +77,8 @@ export function ConfirmedStep() {
         </div>
 
         <div className="mb-4">
-          <strong>Total:</strong>
+          <strong>Total: </strong>
           <span className="text-lg font-bold">
-            {' '}
-            R${' '}
             {totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>
         </div>
@@ -91,10 +90,7 @@ export function ConfirmedStep() {
           <Input
             id="forPersonName"
             placeholder="Nome"
-            value={form.getValues('confirmedStep.forPersonName')}
-            onChange={(e) =>
-              form.setValue('confirmedStep.forPersonName', e.target.value)
-            }
+            {...form.register('confirmedStep.forPersonName')}
           />
         </div>
       </div>
@@ -107,7 +103,8 @@ export function ConfirmedStep() {
           onClick={async () => {
             setIsCreate(true);
             form.setValue('confirmedStep', {
-              clientId: form.getValues('clientAdmStep.clientId'),
+              clientId: form.getValues('confirmedStep.clientId'),
+              clientName: form.getValues('confirmedStep.clientName'),
               date: form.getValues('dayHourStep.date'),
               startTime: form.getValues('dayHourStep.startTime'),
               endTime:
@@ -115,6 +112,7 @@ export function ConfirmedStep() {
                 form.getValues('dayHourStep.durationMinutes'),
               professionalId: 1,
               services: form.getValues('serviceAddStep'),
+              forPersonName: form.getValues('confirmedStep.forPersonName'),
             });
             BookingService.createBooking(form.getValues('confirmedStep'))
               .then(() => {

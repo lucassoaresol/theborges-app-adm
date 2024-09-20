@@ -5,7 +5,7 @@ import { httpClient } from './httpClient';
 interface IUpdateWorkingDayDTO {
   professionalId: number;
   start: number;
-  end: number;
+  end?: number;
 }
 
 interface IFreeTimeDTO {

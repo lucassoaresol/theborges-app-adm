@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@hookform/error-message';
 import Fuse from 'fuse.js';
 import { ChangeEvent, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -30,11 +31,10 @@ export function ClientAdmStep() {
         'email',
         {
           name: 'phone',
-          // Normaliza o número de telefone antes de buscar
           getFn: (client: { phone: string }) => normalizePhoneNumber(client.phone),
         },
       ],
-      threshold: 0.3, // Ajuste da sensibilidade da busca
+      threshold: 0.3,
     };
 
     return new Fuse(clients || [], options);
@@ -46,14 +46,14 @@ export function ClientAdmStep() {
   };
 
   const filteredClients = useMemo(() => {
-    if (!searchTerm) return clients.slice(0, 3); // Se não houver termo de busca, retorna os 3 primeiros clientes
+    if (!searchTerm) return clients.slice(0, 3);
 
-    const result = fuse.search(searchTerm); // Faz a busca com Fuse.js
-    return result.map(({ item }) => item).slice(0, 3); // Limita a exibição a 3 resultados
+    const result = fuse.search(searchTerm);
+    return result.map(({ item }) => item).slice(0, 3);
   }, [searchTerm, clients, fuse]);
 
   async function handleNextStep() {
-    const isValid = await form.trigger('clientAdmStep', {
+    const isValid = await form.trigger('clientStep', {
       shouldFocus: true,
     });
 
@@ -70,42 +70,43 @@ export function ClientAdmStep() {
         title="Seleção de Cliente"
         description="Por favor, escolha o cliente para o agendamento."
       />
-      <div>
-        <div className="flex items-center mb-4 gap-2">
-          <Input
-            onChange={handleSearch}
-            value={searchTerm}
-            placeholder="Buscar cliente"
-          />
-          <Button size="sm" onClick={() => setNewClient(true)}>
-            Novo Cliente
-          </Button>
-        </div>
-        {filteredClients.length === 0 && <p>Nenhum cliente encontrado</p>}
-        {filteredClients.map((cl) => (
-          <Button
-            key={cl.id}
-            variant={
-              form.getValues('clientAdmStep.clientId') === cl.id ? 'default' : 'outline'
-            }
-            className="w-full mt-1"
-            onClick={() => {
-              form.setValue('clientAdmStep', {
-                clientId: cl.id,
-                name: cl.name,
-                phone: cl.phone,
-              });
-            }}
-          >
-            {`${cl.name} - ${cl.phone}`}
-          </Button>
-        ))}
-        {form.formState.errors.clientAdmStep?.message && (
-          <small className="text-destructive">
-            {form.formState.errors.clientAdmStep.message}
-          </small>
-        )}
+
+      <div className="flex items-center mb-4 gap-2">
+        <Input
+          onChange={handleSearch}
+          value={searchTerm}
+          placeholder="Buscar cliente"
+        />
+        <Button size="sm" onClick={() => setNewClient(true)}>
+          Novo Cliente
+        </Button>
       </div>
+      {filteredClients.length === 0 && <p>Nenhum cliente encontrado</p>}
+      {filteredClients.map((cl) => (
+        <Button
+          key={cl.id}
+          variant={
+            form.getValues('clientStep.clientId') === cl.id ? 'default' : 'outline'
+          }
+          className="w-full mt-1"
+          onClick={() => {
+            form.setValue('clientStep', {
+              clientId: cl.id,
+              name: cl.name,
+              phone: cl.phone,
+            });
+          }}
+        >
+          {`${cl.name} - ${cl.phone}`}
+        </Button>
+      ))}
+      <ErrorMessage
+        errors={form.formState.errors}
+        name="clientStep"
+        render={({ message }) => (
+          <small className="text-red-400 block mt-1 ml-1">{message}</small>
+        )}
+      />
 
       <StepperFooter>
         <StepperPreviousButton disabled={form.formState.isSubmitting} />

@@ -5,6 +5,9 @@ import { httpClient } from './httpClient';
 interface ICreateClientDTO {
   name: string;
   phone: string;
+  birthDay?: number;
+  birthMonth?: number;
+  wantsPromotions?: boolean;
 }
 
 interface IParamsListClientDTO {
@@ -12,9 +15,30 @@ interface IParamsListClientDTO {
   limit?: number;
 }
 
+interface IUpdateClientDTO {
+  id: number;
+  name?: string;
+  phone?: string;
+  birthDay?: number;
+  birthMonth?: number;
+  wantsPromotions?: boolean;
+}
+
 export class ClientService {
-  static async create({ name, phone }: ICreateClientDTO) {
-    const { data } = await httpClient.post<IClient>('/clients', { name, phone });
+  static async create({
+    name,
+    phone,
+    birthDay,
+    birthMonth,
+    wantsPromotions,
+  }: ICreateClientDTO) {
+    const { data } = await httpClient.post<IClient>('/clients', {
+      name,
+      phone,
+      birthDay,
+      birthMonth,
+      wantsPromotions,
+    });
 
     return data;
   }
@@ -34,5 +58,24 @@ export class ClientService {
     const { data } = await httpClient.get<{ result: IClient }>(`/clients/${id}`);
 
     return data.result;
+  }
+
+  static async update({
+    id,
+    birthDay,
+    birthMonth,
+    name,
+    phone,
+    wantsPromotions,
+  }: IUpdateClientDTO) {
+    const { data } = await httpClient.patch<IClient>(`/clients/${id}`, {
+      name,
+      phone,
+      birthDay,
+      birthMonth,
+      wantsPromotions,
+    });
+
+    return data;
   }
 }

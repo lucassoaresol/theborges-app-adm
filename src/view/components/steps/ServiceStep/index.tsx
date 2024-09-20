@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@hookform/error-message';
 import { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -68,12 +69,13 @@ export function ServiceStep() {
           </Button>
         ))
       )}
-      {form.formState.errors.serviceStep?.message && (
-        <small className="text-destructive">
-          {form.formState.errors.serviceStep.message}
-        </small>
-      )}
-
+      <ErrorMessage
+        errors={form.formState.errors}
+        name="serviceStep"
+        render={({ message }) => (
+          <small className="text-red-400 block mt-1 ml-1">{message}</small>
+        )}
+      />
       <StepperFooter>
         <StepperPreviousButton disabled={form.formState.isSubmitting} />
         <StepperNextButton onClick={handleNextStep} />

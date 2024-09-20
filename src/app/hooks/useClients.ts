@@ -11,7 +11,7 @@ export function useClients() {
     queryKey: ['clients'],
     queryFn: ({ pageParam = 0 }) => ClientService.getAll({ pageParam, limit: 20 }),
     getNextPageParam: (lastPage, pages) =>
-      lastPage.hasMore ? pages.length * 20 : undefined, // Se ainda houver mais clientes, retorna o próximo valor
+      lastPage.hasMore ? pages.length * 20 : undefined,
     initialPageParam: 0,
   });
 
@@ -21,14 +21,16 @@ export function useClients() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const { mutate, isPending, isError } = useMutation({
+  const {
+    mutate: create,
+    isPending: createLoading,
+    isError: createError,
+  } = useMutation({
     mutationFn: ClientService.create,
     onSuccess: (newClient) => {
-      // Atualiza o cache da lista de clientes automaticamente
       queryClient.setQueryData(['clients'], (oldData: any) => {
         if (!oldData || !oldData.pages) return null;
 
-        // Adiciona o novo cliente à primeira página de dados
         return {
           ...oldData,
           pages: oldData.pages.map(
@@ -46,10 +48,31 @@ export function useClients() {
     },
   });
 
+  const { mutate: update, isPending: updateLoading } = useMutation({
+    mutationFn: ClientService.update,
+    onSuccess: (updatedClient) => {
+      queryClient.setQueryData(['clients'], (oldData: any) => {
+        if (!oldData || !oldData.pages) return null;
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: { result: IClient[] }) => ({
+            ...page,
+            result: page.result.map((client) =>
+              client.id === updatedClient.id ? updatedClient : client,
+            ),
+          })),
+        };
+      });
+    },
+  });
+
   return {
     clients: data ? data.pages.flatMap((page) => page.result) : [],
-    create: mutate,
-    createLoading: isPending,
-    createError: isError,
+    create,
+    createLoading,
+    createError,
+    update,
+    updateLoading,
   };
 }

@@ -1,14 +1,16 @@
-/* eslint-disable react/no-array-index-key */
-
+import { ErrorMessage } from '@hookform/error-message';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { z } from 'zod';
 
 import { useClients } from '@/app/hooks/useClients';
+import { useVerifyPhone } from '@/app/hooks/useVerifyPhone';
+import { FormData } from '@/view/pages/Booking';
 
 import { PhoneInput } from '../../PhoneInput';
 import { StepHeader } from '../../StepHeader';
 import { StepperFooter, StepperPreviousButton } from '../../Stepper';
+import { useStepper } from '../../Stepper/useStepper';
 import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { Label } from '../../ui/Label';
@@ -26,9 +28,12 @@ interface INewClientAdmStep {
 }
 
 export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
-  const { createError, create } = useClients();
+  const { loading } = useVerifyPhone();
+  const { createError, create, createLoading } = useClients();
+  const { nextStep } = useStepper();
+  const form = useFormContext<FormData>();
 
-  const form = useForm<IFormData>({
+  const formCreate = useForm<IFormData>({
     resolver: zodResolver(schema),
   });
 
@@ -37,13 +42,19 @@ export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
     handleSubmit: hookFormSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = form;
+  } = formCreate;
 
   const handleSubmit = hookFormSubmit((data) => {
     create(data, {
-      onSuccess: () => {
+      onSuccess: (cl) => {
         reset();
         addCreate();
+        form.setValue('clientStep', {
+          clientId: cl.id,
+          name: cl.name,
+          phone: cl.phone,
+        });
+        nextStep();
       },
     });
   });
@@ -55,37 +66,42 @@ export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
         description="Insira os dados necessários para cadastrar um novo cliente no sistema."
       />
       <FormProvider {...form}>
-        <div>
-          {(Object.keys(errors).length > 0 || createError) && (
-            <div
-              className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
-              role="alert"
-            >
-              <ul>
-                {/* Exibir erros de validação */}
-                {Object.values(errors).map((error, index) => (
-                  <li key={index}>{(error as any).message}</li>
-                ))}
-                {/* Exibir erro do servidor */}
-                {createError && <li>Cliente já está cadastrado</li>}
-              </ul>
-            </div>
-          )}
-
-          <div className="space-y-1">
-            <Label className="text-right" htmlFor="name">
-              Nome
-            </Label>
-            <Input id="name" {...register('name')} />
-          </div>
-          <div className="space-y-1">
-            <PhoneInput />
-          </div>
+        <div className="space-y-1">
+          <Label className="text-right" htmlFor="name">
+            Nome
+          </Label>
+          <Input id="name" {...register('name')} />
+          <ErrorMessage
+            errors={errors}
+            name="name"
+            render={({ message }) => (
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
+            )}
+          />
         </div>
+        <div className="space-y-1">
+          <PhoneInput />
+          <ErrorMessage
+            errors={errors}
+            name="phoneData"
+            render={({ message }) => (
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
+            )}
+          />
+        </div>
+        {createError && (
+          <small className="text-red-400 block mt-1 ml-1">
+            Cliente já está cadastrado
+          </small>
+        )}
       </FormProvider>
       <StepperFooter>
         <StepperPreviousButton onClick={addCreate} />
-        <Button disabled={isSubmitting} size="sm" onClick={handleSubmit}>
+        <Button
+          disabled={isSubmitting || createLoading || loading}
+          size="sm"
+          onClick={handleSubmit}
+        >
           Salvar
         </Button>
       </StepperFooter>

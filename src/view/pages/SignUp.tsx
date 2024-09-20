@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useVerifyPhone } from '@/app/hooks/useVerifyPhone';
 import { AuthService } from '@/app/services/AuthService';
 import { Button } from '@/view/components/ui/Button';
 import { Input } from '@/view/components/ui/Input';
@@ -24,6 +25,7 @@ const schema = z.object({
 type IFormData = z.infer<typeof schema>;
 
 export function SignUp() {
+  const { loading } = useVerifyPhone();
   const form = useForm<IFormData>({
     resolver: zodResolver(schema),
   });
@@ -51,7 +53,7 @@ export function SignUp() {
               errors={errors}
               name="name"
               render={({ message }) => (
-                <small className="text-red-400 block">{message}</small>
+                <small className="text-red-400 block mt-1 ml-1">{message}</small>
               )}
             />
           </div>
@@ -62,7 +64,7 @@ export function SignUp() {
               errors={errors}
               name="phoneData"
               render={({ message }) => (
-                <small className="text-red-400 block">{message}</small>
+                <small className="text-red-400 block mt-1 ml-1">{message}</small>
               )}
             />
           </div>
@@ -74,7 +76,7 @@ export function SignUp() {
               errors={errors}
               name="username"
               render={({ message }) => (
-                <small className="text-red-400 block">{message}</small>
+                <small className="text-red-400 block mt-1 ml-1">{message}</small>
               )}
             />
           </div>
@@ -86,12 +88,12 @@ export function SignUp() {
               errors={errors}
               name="password"
               render={({ message }) => (
-                <small className="text-red-400 block">{message}</small>
+                <small className="text-red-400 block mt-1 ml-1">{message}</small>
               )}
             />
           </div>
 
-          <Button className="mt-3" type="submit" disabled={isSubmitting}>
+          <Button className="mt-3" type="submit" disabled={isSubmitting || loading}>
             Entrar
           </Button>
         </form>

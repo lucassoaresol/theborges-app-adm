@@ -6,8 +6,12 @@ import { z } from 'zod';
 import { Stepper } from '../components/Stepper';
 import { CategoryStep } from '../components/steps/CategoryStep';
 import { categoryStepSchema } from '../components/steps/CategoryStep/schema';
-import { ClientStep } from '../components/steps/ClientStep/All';
+import { ClientStep } from '../components/steps/ClientStep';
 import { clientStepSchema } from '../components/steps/ClientStep/schema';
+import { ConfirmedStep } from '../components/steps/ConfirmedStep';
+import { confirmedStepSchema } from '../components/steps/ConfirmedStep/schema';
+import { DayHourStep } from '../components/steps/DayHourStep';
+import { dayHourStepSchema } from '../components/steps/DayHourStep/schema';
 import { ServiceAddStep } from '../components/steps/ServiceAddStep';
 import { serviceAddStepSchema } from '../components/steps/ServiceAddStep/schema';
 import { ServiceStep } from '../components/steps/ServiceStep';
@@ -17,7 +21,9 @@ const schema = z.object({
   categoryStep: categoryStepSchema,
   serviceStep: serviceStepSchema,
   serviceAddStep: serviceAddStepSchema,
+  dayHourStep: dayHourStepSchema,
   clientStep: clientStepSchema,
+  confirmedStep: confirmedStepSchema,
 });
 
 export type FormData = z.infer<typeof schema>;
@@ -55,8 +61,13 @@ export function New() {
                 content: <ServiceAddStep />,
               },
               {
-                label: 'Identifique-se',
-                content: <ClientStep />,
+                label: 'Data e Horário',
+                content: <DayHourStep />,
+              },
+              { label: 'Cliente', content: <ClientStep /> },
+              {
+                label: 'Confirmação',
+                content: <ConfirmedStep />,
               },
             ]}
           />

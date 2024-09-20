@@ -10,19 +10,19 @@ import { ClientAdmStep } from '../components/steps/ClientStep';
 import { clientStepSchema } from '../components/steps/ClientStep/schema';
 import { ConfirmedStep } from '../components/steps/ConfirmedStep';
 import { confirmedStepSchema } from '../components/steps/ConfirmedStep/schema';
-import { DayHourAdmStep } from '../components/steps/DayHourAdmStep';
-import { dayHourStepSchema } from '../components/steps/DayHourAdmStep/schema';
+import { DayHourAdmStep } from '../components/steps/DayHourStep';
+import { dayHourStepSchema } from '../components/steps/DayHourStep/schema';
 import { ServiceAddStep } from '../components/steps/ServiceAddStep';
 import { serviceAddStepSchema } from '../components/steps/ServiceAddStep/schema';
 import { ServiceStep } from '../components/steps/ServiceStep';
 import { serviceStepSchema } from '../components/steps/ServiceStep/schema';
 
 const schema = z.object({
-  clientAdmStep: clientStepSchema,
   categoryStep: categoryStepSchema,
   serviceStep: serviceStepSchema,
   serviceAddStep: serviceAddStepSchema,
   dayHourStep: dayHourStepSchema,
+  clientStep: clientStepSchema,
   confirmedStep: confirmedStepSchema,
 });
 

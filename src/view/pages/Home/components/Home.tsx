@@ -5,6 +5,7 @@ import { useMediaQuery } from 'react-responsive';
 import { useWorkingDays } from '@/app/hooks/useWorkingDays';
 import dayLib from '@/app/lib/dayjs';
 import { Button } from '@/view/components/ui/Button';
+import { ScrollArea, ScrollBar } from '@/view/components/ui/ScrollArea';
 import { Skeleton } from '@/view/components/ui/Skeleton';
 
 import { useHome } from '../useHome';
@@ -42,7 +43,7 @@ export function HomeContent() {
   return (
     <div className="mt-10 flex flex-col items-center justify-center px-4">
       {isDesktopOrLaptop ? (
-        <div className="mt-5 mb-4 p-3">
+        <div className="mb-4 p-3">
           <div className="flex items-center gap-2">
             {/* Botão de voltar, desativado se estiver no primeiro bloco */}
             <Button size="icon" onClick={handlePrev} disabled={currentBlock === 0}>
@@ -84,7 +85,7 @@ export function HomeContent() {
           </div>
         </div>
       ) : (
-        <div className="mt-5 flex items-center gap-4 mb-4 w-full overflow-x-auto p-3">
+        <ScrollArea className="flex items-center gap-4 mb-4 w-full p-3">
           <div className="flex justify-center gap-4">
             {workingDays &&
               workingDays.map((el) => {
@@ -103,7 +104,8 @@ export function HomeContent() {
                 );
               })}
           </div>
-        </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       )}
       <Agenda />
     </div>

@@ -1,15 +1,17 @@
-/* eslint-disable react/no-array-index-key */
+import { ErrorMessage } from '@hookform/error-message';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { z } from 'zod';
 
+import { useVerifyPhone } from '@/app/hooks/useVerifyPhone';
 import { ClientService } from '@/app/services/ClientService';
 import { FormData } from '@/view/pages/New';
 
 import { PhoneInput } from '../../PhoneInput';
 import { StepHeader } from '../../StepHeader';
 import { StepperFooter, StepperPreviousButton } from '../../Stepper';
+import { useStepper } from '../../Stepper/useStepper';
 import { Button } from '../../ui/Button';
 import { NewClientStep } from '../NewClientStep/All';
 
@@ -21,6 +23,8 @@ const schema = z.object({
 type IFormData = z.infer<typeof schema>;
 
 export function ClientStep() {
+  const { loading } = useVerifyPhone();
+  const { nextStep } = useStepper();
   const [isClient, setIsClient] = useState(false);
   const [newClient, setNewClient] = useState(false);
 
@@ -46,6 +50,11 @@ export function ClientStep() {
         phone: client.phone,
       });
       reset();
+      if (!client.birthDay || !client.birthMonth) {
+        setNewClient(true);
+      } else {
+        nextStep();
+      }
     } catch {
       form.setValue('clientStep.phone', data.phone);
       setNewClient(true);
@@ -59,32 +68,28 @@ export function ClientStep() {
   ) : (
     <div>
       <StepHeader
-        title="Seleção de Cliente"
-        description="Por favor, escolha o cliente para o agendamento."
+        title="Informações do Cliente"
+        description="Digite o número do seu WhatsApp para contato."
       />
       <FormProvider {...formGet}>
-        <div>
-          {Object.keys(errors).length > 0 && (
-            <div
-              className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
-              role="alert"
-            >
-              <ul>
-                {/* Exibir erros de validação */}
-                {Object.values(errors).map((error, index) => (
-                  <li key={index}>{(error as any).message}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-          <div className="space-y-1">
-            <PhoneInput />
-          </div>
+        <div className="space-y-1">
+          <PhoneInput />
         </div>
+        <ErrorMessage
+          errors={errors}
+          name="phoneData"
+          render={({ message }) => (
+            <small className="text-red-400 block mt-1 ml-1">{message}</small>
+          )}
+        />
       </FormProvider>
       <StepperFooter>
         <StepperPreviousButton disabled={form.formState.isSubmitting} />
-        <Button disabled={isSubmitting || isClient} size="sm" onClick={handleSubmit}>
+        <Button
+          disabled={isSubmitting || isClient || loading}
+          size="sm"
+          onClick={handleSubmit}
+        >
           Entrar
         </Button>
       </StepperFooter>

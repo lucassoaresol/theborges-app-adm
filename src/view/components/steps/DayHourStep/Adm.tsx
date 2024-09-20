@@ -1,8 +1,10 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import { ErrorMessage } from '@hookform/error-message';
 import { max, min, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useMediaQuery } from 'react-responsive';
 
 import { useWorkingDays } from '@/app/hooks/useWorkingDays';
 import dayLib from '@/app/lib/dayjs';
@@ -29,6 +31,10 @@ export function DayHourAdmStep() {
       total: number;
     }[]
   >();
+
+  const isMaxW = useMediaQuery({
+    query: '(max-width: 450px)',
+  });
 
   const workingDayDates = useMemo(
     () =>
@@ -81,8 +87,8 @@ export function DayHourAdmStep() {
   return (
     <div>
       <StepHeader
-        title="Serviços Adicionais"
-        description="Adicione serviços extras ao seu agendamento, se necessário."
+        title="Data e Horário"
+        description="Escolha a data e o horário desejados para agendar seu atendimento."
       />
       <div className="flex items-center space-x-2 mb-2">
         <Checkbox
@@ -97,26 +103,29 @@ export function DayHourAdmStep() {
           Ignorar Bloqueados
         </label>
       </div>
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start">
+      <div className={isMaxW ? '' : 'flex'}>
         {isLoading ? (
           <Skeleton className="h-[40px] w-full rounded-xl" />
         ) : (
-          <div className="w-full md:w-auto">
-            <Calendar
-              mode="single"
-              fromDate={minDate}
-              toDate={maxDate}
-              disabled={closedDays}
-              locale={ptBR}
-              selected={selectedDate}
-              onSelect={(date) => {
-                setSelectedDate(date);
-              }}
-            />
-          </div>
+          <Calendar
+            mode="single"
+            classNames={{
+              month: `${isMaxW && 'flex flex-col'} space-y-4`,
+              table: `${isMaxW ? 'self-center' : 'w-full'} border-collapse space-y-1`,
+            }}
+            fromDate={minDate}
+            toDate={maxDate}
+            disabled={closedDays}
+            locale={ptBR}
+            selected={selectedDate}
+            onSelect={(date) => {
+              setSelectedDate(date);
+            }}
+            weekStartsOn={1}
+          />
         )}
 
-        <div className="mt-4 flex flex-col gap-4 md:mt-0 md:w-auto md:flex-row md:flex-wrap md:justify-end">
+        <div className={`grid grid-cols-${isMaxW ? '4' : '2'} gap-2 p-2`}>
           {hours &&
             hours.map((hr) => (
               <Button
@@ -124,9 +133,8 @@ export function DayHourAdmStep() {
                 variant={
                   form.getValues('dayHourStep.startTime') === hr.total
                     ? 'default'
-                    : 'outline'
+                    : 'success'
                 }
-                className={`p-3 ${form.getValues('dayHourStep.startTime') === hr.total ? 'bg-green-500 hover:bg-green-600' : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'}`}
                 onClick={() => {
                   const dayHourStep = form.getValues('dayHourStep');
                   form.setValue('dayHourStep', {
@@ -140,11 +148,13 @@ export function DayHourAdmStep() {
             ))}
         </div>
       </div>
-      {form.formState.errors.dayHourStep?.message && (
-        <small className="text-destructive">
-          {form.formState.errors.dayHourStep.message}
-        </small>
-      )}
+      <ErrorMessage
+        errors={form.formState.errors}
+        name="dayHourStep"
+        render={({ message }) => (
+          <small className="text-red-400 block mt-1 ml-1">{message}</small>
+        )}
+      />
       <StepperFooter>
         <StepperPreviousButton disabled={form.formState.isSubmitting} />
         <StepperNextButton onClick={handleNextStep} />

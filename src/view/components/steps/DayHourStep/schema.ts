@@ -4,9 +4,7 @@ export const dayHourStepSchema = z.object(
   {
     date: z.string(),
     startTime: z.number(),
-    price: z.number(),
-    order: z.number(),
     durationMinutes: z.number(),
   },
-  { message: 'Selecione um serviço' },
+  { message: 'Selecione um dia e horário' },
 );

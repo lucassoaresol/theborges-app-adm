@@ -1,3 +1,5 @@
+import { IBooking } from '../entities/IBooking';
+
 import { httpClient } from './httpClient';
 
 interface ICreateBookingDTO {
@@ -12,6 +14,11 @@ interface ICreateBookingDTO {
     price: number;
     order: number;
   }[];
+}
+
+interface IUpdateBookingDTO {
+  id: number;
+  status: 'CANCELLED' | 'RESCHEDULED';
 }
 
 export class BookingService {
@@ -33,5 +40,19 @@ export class BookingService {
       startTime,
       forPersonName,
     });
+  }
+
+  static async get(id: string) {
+    const { data } = await httpClient.get<{ result: IBooking }>(`/bookings/${id}`);
+
+    return data.result;
+  }
+
+  static async update({ id, status }: IUpdateBookingDTO) {
+    const { data } = await httpClient.patch<{ result: IBooking }>(`/bookings/${id}`, {
+      status,
+    });
+
+    return data.result;
   }
 }

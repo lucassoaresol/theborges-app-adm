@@ -1,3 +1,4 @@
+import { ErrorMessage } from '@hookform/error-message';
 import { useFormContext } from 'react-hook-form';
 
 import { useCategories } from '@/app/hooks/useCategories';
@@ -54,11 +55,13 @@ export function CategoryStep() {
           </Button>
         ))
       )}
-      {form.formState.errors.categoryStep?.message && (
-        <small className="text-destructive">
-          {form.formState.errors.categoryStep.message}
-        </small>
-      )}
+      <ErrorMessage
+        errors={form.formState.errors}
+        name="categoryStep"
+        render={({ message }) => (
+          <small className="text-red-400 block mt-1 ml-1">{message}</small>
+        )}
+      />
 
       <StepperFooter>
         <StepperNextButton onClick={handleNextStep} />

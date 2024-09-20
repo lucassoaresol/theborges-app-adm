@@ -10,7 +10,7 @@ export function RouteLayout() {
   });
 
   return isDesktop ? (
-    <div className="flex w-screen">
+    <div className="flex w-full">
       <div className="w-[25%]">
         <div className="bg-secondary h-16 pl-6">
           <Logo />
