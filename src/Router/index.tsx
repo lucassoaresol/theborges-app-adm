@@ -5,6 +5,7 @@ import { RouteLayout } from '@/view/layouts/RouteLayout';
 import { Booking } from '@/view/pages/Booking';
 import { BookingAdm } from '@/view/pages/BookingAdm';
 import { BookingDetail } from '@/view/pages/BookingDetail';
+import { BookingHour } from '@/view/pages/BookingHour';
 import { Home } from '@/view/pages/Home';
 import { New } from '@/view/pages/New';
 import { NewBooking } from '@/view/pages/NewBooking';
@@ -22,6 +23,7 @@ export function Router() {
           <Route element={<RouteLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/booking" element={<Booking />} />
+            <Route path="/booking/hour" element={<BookingHour />} />
             <Route path="/booking/b/:id" element={<BookingAdm />} />
             <Route path="/booking/:id" element={<BookingDetail />} />
           </Route>

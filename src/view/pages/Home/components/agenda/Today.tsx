@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import dayLib from '@/app/lib/dayjs';
@@ -7,14 +7,47 @@ import dayLib from '@/app/lib/dayjs';
 import { useHome } from '../../useHome';
 
 import { Header } from './Header';
-import { Today } from './Today';
 
-export function Agenda() {
+export function Today() {
   const { selectWorkingDay } = useHome();
+  const [nowPosition, setNowPosition] = useState<number | null>(null);
 
   const today = selectWorkingDay
     ? dayLib(selectWorkingDay.date).startOf('day')
     : dayLib();
+
+  const calculateNowPosition = useCallback(() => {
+    if (!selectWorkingDay) return null;
+
+    const now = dayLib();
+    const startOfDay = today.add(selectWorkingDay.time.start, 'm');
+
+    if (now.isBefore(startOfDay)) {
+      return 0; // Antes do horário de expediente
+    }
+
+    const minutesSinceStart = now.diff(startOfDay, 'minutes');
+    const totalMinutesInDay = selectWorkingDay.time.end - selectWorkingDay.time.start;
+
+    if (minutesSinceStart > totalMinutesInDay) {
+      return null; // Após o expediente
+    }
+
+    // Calcular a posição em pixels da linha de "agora"
+    return (minutesSinceStart / totalMinutesInDay) * (totalMinutesInDay / 60) * 350;
+  }, [selectWorkingDay, today]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setNowPosition(calculateNowPosition());
+    }, 60000); // Atualiza a cada 1 minuto
+
+    // Calcular a posição inicial da linha de "agora"
+    setNowPosition(calculateNowPosition());
+
+    // Limpar o intervalo quando o componente for desmontado
+    return () => clearInterval(intervalId);
+  }, [calculateNowPosition]);
 
   const generateHourRange = (start: number, end: number) => {
     const hours = [];
@@ -55,9 +88,50 @@ export function Agenda() {
     [selectWorkingDay],
   );
 
-  return selectWorkingDay && dayLib(selectWorkingDay.date).isSame(dayLib(), 'day') ? (
-    <Today />
-  ) : (
+  const getFreeSlots = useCallback(() => {
+    const freeSlots: {
+      start: number;
+      end: number;
+    }[] = [];
+    if (!selectWorkingDay) return freeSlots;
+
+    const { bookings, time } = selectWorkingDay;
+    const dayStart = time.start;
+    const dayEnd = time.end;
+
+    let previousEnd = dayStart;
+
+    const sortedBookings = [...bookings].sort((a, b) => a.start - b.start);
+
+    sortedBookings.forEach((booking) => {
+      const { start } = booking;
+
+      const verify = start - previousEnd;
+
+      // Calcular o intervalo entre o fim do último agendamento e o início do atual
+      if (verify >= 10 && verify <= 40) {
+        freeSlots.push({
+          start: previousEnd,
+          end: start,
+        });
+      }
+      previousEnd = booking.end;
+    });
+
+    // Verificar intervalo entre o último agendamento e o final do expediente
+    if (dayEnd - previousEnd >= 40) {
+      freeSlots.push({
+        start: previousEnd,
+        end: dayEnd,
+      });
+    }
+
+    return freeSlots;
+  }, [selectWorkingDay]);
+
+  const freeSlots = getFreeSlots();
+
+  return (
     selectWorkingDay && (
       <div className="mt-6 flex flex-col gap-8 items-center max-w-5xl w-full mb-10">
         <Header selectWorkingDay={selectWorkingDay} />
@@ -132,6 +206,54 @@ export function Agenda() {
                   </div>
                 </div>
               ))}
+
+            {/* Renderizar os intervalos livres */}
+            {freeSlots.length > 0 &&
+              freeSlots.map((slot, index) => {
+                const totalMinutes = slot.end - slot.start;
+
+                return (
+                  <Link
+                    key={index}
+                    to="/booking/hour"
+                    state={{
+                      date: today.format('YYYY-MM-DD'),
+                      startTime: slot.start,
+                      endTime: slot.end,
+                    }}
+                  >
+                    <div
+                      className="absolute left-16 w-[75%] bg-secondary text-secondary-foreground p-2 rounded-lg opacity-50 cursor-pointer"
+                      style={{
+                        top: calculateTopPosition(
+                          slot.start,
+                          selectWorkingDay.time.start,
+                        ),
+                        height: calculateHeight(slot.start, slot.end),
+                      }}
+                    >
+                      <div className="text-sm text-center">
+                        Disponível para agendamento ({totalMinutes} minutos)
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+
+            {/* Linha de "agora" */}
+            {dayLib(selectWorkingDay.date).isSame(dayLib(), 'day') &&
+              nowPosition !== null && (
+                <div
+                  className="absolute left-0 w-full h-[2px] bg-red-500"
+                  style={{
+                    top: `${nowPosition}px`,
+                  }}
+                >
+                  <div className="absolute left-4 bg-red-500 text-white px-2 py-1 rounded">
+                    Agora
+                  </div>
+                </div>
+              )}
           </div>
         </div>
       </div>
