@@ -2,6 +2,10 @@ import { IBooking } from '../entities/IBooking';
 
 import { httpClient } from './httpClient';
 
+interface IGetBookingQuery {
+  queryKey: string[];
+}
+
 interface ICreateBookingDTO {
   date: string;
   startTime: number;
@@ -31,7 +35,7 @@ export class BookingService {
     startTime,
     forPersonName,
   }: ICreateBookingDTO) {
-    await httpClient.post('/bookings', {
+    const { data } = await httpClient.post<{ result: IBooking }>('/bookings', {
       clientId,
       date,
       endTime,
@@ -40,10 +44,14 @@ export class BookingService {
       startTime,
       forPersonName,
     });
+
+    return data.result;
   }
 
-  static async get(id: string) {
-    const { data } = await httpClient.get<{ result: IBooking }>(`/bookings/${id}`);
+  static async get({ queryKey }: IGetBookingQuery) {
+    const { data } = await httpClient.get<{ result: IBooking }>(
+      `/bookings/${queryKey.at(-1)}`,
+    );
 
     return data.result;
   }

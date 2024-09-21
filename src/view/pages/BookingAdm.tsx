@@ -31,7 +31,7 @@ export function BookingAdm() {
   useEffect(() => {
     setLoading(true);
     if (id) {
-      BookingService.get(id)
+      BookingService.get({ queryKey: ['', id] })
         .then((res) => {
           form.setValue('confirmedStep.oldId', res.id);
           form.setValue('confirmedStep.clientId', res.clientId);

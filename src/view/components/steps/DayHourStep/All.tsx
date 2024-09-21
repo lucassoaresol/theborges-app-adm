@@ -110,7 +110,7 @@ export function DayHourStep() {
         )}
 
         <div className="grid grid-cols-2 gap-2 p-2">
-          {hours &&
+          {hours && hours.length > 0 ? (
             hours.map((hr) => (
               <Button
                 className="w-full"
@@ -130,7 +130,12 @@ export function DayHourStep() {
               >
                 {hr.display}
               </Button>
-            ))}
+            ))
+          ) : (
+            <small className="text-red-400 block mt-1 ml-1">
+              Não há horários disponíveis no momento.
+            </small>
+          )}
         </div>
       </div>
       <ErrorMessage
