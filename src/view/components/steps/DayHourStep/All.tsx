@@ -109,10 +109,11 @@ export function DayHourStep() {
           />
         )}
 
-        <div className={`grid grid-cols-${isMaxW ? '4' : '2'} gap-2 p-2`}>
+        <div className="grid grid-cols-2 gap-2 p-2">
           {hours &&
             hours.map((hr) => (
               <Button
+                className="w-full"
                 key={hr.total}
                 variant={
                   form.getValues('dayHourStep.startTime') === hr.total
