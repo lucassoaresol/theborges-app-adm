@@ -31,7 +31,7 @@ import {
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   phone: z.string().min(2, 'O Whatsapp informado é inválido'),
-  phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
+  phoneData: z.string().min(14, 'Whatsapp é obrigatório'),
   birthDay: z.number({ required_error: 'Dia do Aniversário é obrigatório' }),
   birthMonth: z.number({ required_error: 'Mês do Aniversário é obrigatório' }),
   wantsPromotions: z.boolean(),
@@ -121,6 +121,13 @@ export function NewClientStep({ addCreate }: INewClientAdmStep) {
         </div>
         <div className="space-y-1">
           <PhoneInput />
+          <ErrorMessage
+            errors={errors}
+            name="phoneData"
+            render={({ message }) => (
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
+            )}
+          />
         </div>
         <div className="flex space-x-4">
           <div className="w-1/2">

@@ -17,7 +17,7 @@ import { NewClientStep } from '../NewClientStep/All';
 
 const schema = z.object({
   phone: z.string().min(2, 'O Whatsapp informado é inválido'),
-  phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
+  phoneData: z.string().min(14, 'Whatsapp é obrigatório'),
 });
 
 type IFormData = z.infer<typeof schema>;
@@ -74,14 +74,14 @@ export function ClientStep() {
       <FormProvider {...formGet}>
         <div className="space-y-1">
           <PhoneInput />
+          <ErrorMessage
+            errors={errors}
+            name="phoneData"
+            render={({ message }) => (
+              <small className="text-red-400 block mt-1 ml-1">{message}</small>
+            )}
+          />
         </div>
-        <ErrorMessage
-          errors={errors}
-          name="phoneData"
-          render={({ message }) => (
-            <small className="text-red-400 block mt-1 ml-1">{message}</small>
-          )}
-        />
       </FormProvider>
       <StepperFooter>
         <StepperPreviousButton disabled={form.formState.isSubmitting} />

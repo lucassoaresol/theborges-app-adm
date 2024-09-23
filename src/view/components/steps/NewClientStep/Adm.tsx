@@ -18,7 +18,7 @@ import { Label } from '../../ui/Label';
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   phone: z.string().min(2, 'O Whatsapp informado é inválido'),
-  phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
+  phoneData: z.string().min(14, 'Whatsapp é obrigatório'),
 });
 
 type IFormData = z.infer<typeof schema>;
@@ -65,7 +65,7 @@ export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
         title="Cadastro de Novo Cliente"
         description="Insira os dados necessários para cadastrar um novo cliente no sistema."
       />
-      <FormProvider {...form}>
+      <FormProvider {...formCreate}>
         <div className="space-y-1">
           <Label className="text-right" htmlFor="name">
             Nome

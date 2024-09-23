@@ -54,7 +54,7 @@ export function PhoneInput() {
         setValue('phone', extractPhoneNumber(normalizedPhone));
       }
 
-      if (name === 'phone' && phone.length >= 13) {
+      if (name === 'phone' && phone.length >= 12) {
         verifyPhone(phone)
           .then(() => clearErrors('phoneData'))
           .catch(() => {

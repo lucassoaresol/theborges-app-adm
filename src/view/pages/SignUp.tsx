@@ -14,7 +14,7 @@ import { PhoneInput } from '../components/PhoneInput';
 const schema = z.object({
   name: z.string().min(1, 'Nome é obrigatório'),
   phone: z.string().min(2, 'O Whatsapp informado é inválido'),
-  phoneData: z.string().min(15, 'Whatsapp é obrigatório'),
+  phoneData: z.string().min(14, 'Whatsapp é obrigatório'),
   username: z
     .string()
     .min(1, 'Username é obrigatório')

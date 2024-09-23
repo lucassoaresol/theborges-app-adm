@@ -13,10 +13,6 @@ import { Button } from '../../ui/Button';
 import { Input } from '../../ui/Input';
 import { NewClientAdmStep } from '../NewClientStep';
 
-function normalizePhoneNumber(phone: string) {
-  return phone.replace(/\D/g, '');
-}
-
 export function ClientAdmStep() {
   const { clients } = useClients();
   const { nextStep } = useStepper();
@@ -26,15 +22,8 @@ export function ClientAdmStep() {
 
   const fuse = useMemo(() => {
     const options = {
-      keys: [
-        'name',
-        'email',
-        {
-          name: 'phone',
-          getFn: (client: { phone: string }) => normalizePhoneNumber(client.phone),
-        },
-      ],
-      threshold: 0.3,
+      keys: ['name', 'email', 'phone'],
+      threshold: 0.1,
     };
 
     return new Fuse(clients || [], options);
@@ -45,10 +34,23 @@ export function ClientAdmStep() {
     setSearchTerm(search);
   };
 
+  const normalizeSearch = (search: string) => {
+    let valueReturn = search;
+    if (valueReturn.startsWith('+')) {
+      valueReturn = valueReturn.slice(1);
+    }
+
+    if (parseInt(valueReturn, 10)) {
+      valueReturn = valueReturn.replace(/\D/g, '');
+    }
+
+    return valueReturn;
+  };
+
   const filteredClients = useMemo(() => {
     if (!searchTerm) return clients.slice(0, 3);
 
-    const result = fuse.search(searchTerm);
+    const result = fuse.search(normalizeSearch(searchTerm));
     return result.map(({ item }) => item).slice(0, 3);
   }, [searchTerm, clients, fuse]);
 
