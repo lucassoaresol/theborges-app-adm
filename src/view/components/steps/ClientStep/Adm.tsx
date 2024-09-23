@@ -35,7 +35,8 @@ export function ClientAdmStep() {
   };
 
   const normalizeSearch = (search: string) => {
-    let valueReturn = search;
+    let valueReturn = search.replace(/\u202A/g, '');
+
     if (valueReturn.startsWith('+')) {
       valueReturn = valueReturn.slice(1);
     }
