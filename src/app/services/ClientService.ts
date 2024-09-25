@@ -54,8 +54,24 @@ export class ClientService {
     return data;
   }
 
-  static async get(id: string) {
-    const { data } = await httpClient.get<{ result: IClient }>(`/clients/${id}`);
+  static async getById(id: string) {
+    const { data } = await httpClient.get<{ result: IClient }>(`/clients/by-id/${id}`);
+
+    return data.result;
+  }
+
+  static async getByPhone(id: string) {
+    const { data } = await httpClient.get<{ result: IClient }>(
+      `/clients/by-phone/${id}`,
+    );
+
+    return data.result;
+  }
+
+  static async getByPublicId(id: string) {
+    const { data } = await httpClient.get<{ result: IClient }>(
+      `/clients/by-public-id/${id}`,
+    );
 
     return data.result;
   }

@@ -48,9 +48,17 @@ export class BookingService {
     return data.result;
   }
 
-  static async get({ queryKey }: IGetBookingQuery) {
+  static async getById({ queryKey }: IGetBookingQuery) {
     const { data } = await httpClient.get<{ result: IBooking }>(
-      `/bookings/${queryKey.at(-1)}`,
+      `/bookings/by-id/${queryKey.at(-1)}`,
+    );
+
+    return data.result;
+  }
+
+  static async getByPublicId({ queryKey }: IGetBookingQuery) {
+    const { data } = await httpClient.get<{ result: IBooking }>(
+      `/bookings/by-public-id/${queryKey.at(-1)}`,
     );
 
     return data.result;

@@ -43,7 +43,7 @@ export function ClientStep() {
   const handleSubmit = hookFormSubmit(async (data) => {
     setIsClient(true);
     try {
-      const client = await ClientService.get(data.phone);
+      const client = await ClientService.getByPhone(data.phone);
       form.setValue('clientStep', {
         clientId: client.id,
         name: client.name,

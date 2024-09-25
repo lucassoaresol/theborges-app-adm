@@ -9,7 +9,7 @@ export function useBookings() {
 
   const { data: booking, isFetching: bookingLoading } = useQuery({
     queryKey: ['booking', bookingId!],
-    queryFn: BookingService.get,
+    queryFn: BookingService.getById,
     refetchInterval: Infinity,
     enabled: !!bookingId,
   });
@@ -18,11 +18,17 @@ export function useBookings() {
     mutationFn: BookingService.update,
     onSuccess: (updateBooking) => {
       queryClient.setQueryData(
-        ['booking', updateBooking.publicId],
+        ['booking', String(updateBooking.id)],
         () => updateBooking,
       );
     },
   });
 
-  return { booking, bookingLoading, update, updateLoading, setBookingId };
+  return {
+    booking,
+    bookingLoading,
+    update,
+    updateLoading,
+    setBookingId,
+  };
 }
