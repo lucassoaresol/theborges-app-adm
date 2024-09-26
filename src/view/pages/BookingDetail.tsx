@@ -7,6 +7,8 @@ import { CancelledBookingAlertDialog } from '@/view/components/CancelledBookingA
 import { Button } from '@/view/components/ui/Button';
 import { Skeleton } from '@/view/components/ui/Skeleton';
 
+import { NoShowBookingAlertDialog } from '../components/NoShowBookingAlertDialog';
+
 export function BookingDetail() {
   const { id } = useParams();
   const { booking, bookingLoading, setBookingId } = useBookings();
@@ -23,7 +25,8 @@ export function BookingDetail() {
       if (
         startDateTime.isBefore(now, 'minute') ||
         booking.status === 'CANCELLED' ||
-        booking.status === 'RESCHEDULED'
+        booking.status === 'RESCHEDULED' ||
+        booking.status === 'NO_SHOW'
       ) {
         return true;
       }
@@ -67,6 +70,48 @@ export function BookingDetail() {
       navigate('/');
     }
   }, [id, navigate, setBookingId]);
+
+  const buttons = useMemo(() => {
+    if (isBefore && booking && booking.status === 'CONFIRMED') {
+      return (
+        <div className="flex flex-col gap-2">
+          <Button variant="success" asChild>
+            <Link to={`https://wa.me/${booking.client.phone}`}>Entrar em contato</Link>
+          </Button>
+          <NoShowBookingAlertDialog bookingId={booking.id} />
+          <Button variant="secondary" asChild>
+            <Link to="/">Voltar</Link>
+          </Button>
+        </div>
+      );
+    }
+
+    if (isBefore && booking) {
+      return (
+        <Button variant="secondary" asChild>
+          <Link to="/">Voltar</Link>
+        </Button>
+      );
+    }
+
+    if (booking) {
+      return (
+        <div className="flex flex-col gap-2">
+          <Button variant="success" asChild>
+            <Link to={`https://wa.me/${booking.client.phone}`}>Entrar em contato</Link>
+          </Button>
+          <Button variant="default" asChild>
+            <Link to={`/booking/b/${booking.publicId}`}>Reagendar</Link>
+          </Button>
+          <CancelledBookingAlertDialog bookingId={booking.id} />
+          <Button variant="secondary" asChild>
+            <Link to="/">Voltar</Link>
+          </Button>
+        </div>
+      );
+    }
+    return undefined;
+  }, [booking, isBefore]);
 
   return bookingLoading ? (
     <Skeleton className="h-[40px] w-full rounded-xl" />
@@ -121,32 +166,15 @@ export function BookingDetail() {
                   return 'Confirmado';
                 case 'COMPLETED':
                   return 'Concluído';
+                case 'NO_SHOW':
+                  return 'Não Compareceu';
                 default:
                   return 'Desconhecido';
               }
             })()}
           </span>
         </div>
-        {isBefore ? (
-          <Button variant="secondary" asChild>
-            <Link to="/">Voltar</Link>
-          </Button>
-        ) : (
-          <div className="flex flex-col gap-2">
-            <Button variant="success" asChild>
-              <Link to={`https://wa.me/${booking.client.phone}`}>
-                Entrar em contato
-              </Link>
-            </Button>
-            <Button variant="default" asChild>
-              <Link to={`/booking/b/${booking.publicId}`}>Reagendar</Link>
-            </Button>
-            <CancelledBookingAlertDialog bookingId={booking.id} />
-            <Button variant="secondary" asChild>
-              <Link to="/">Voltar</Link>
-            </Button>
-          </div>
-        )}
+        {buttons}
       </div>
     )
   );

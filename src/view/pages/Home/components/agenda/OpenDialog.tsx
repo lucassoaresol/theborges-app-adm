@@ -24,6 +24,7 @@ import { Label } from '@/view/components/ui/Label';
 import { useHome } from '../../useHome';
 
 const schema = z.object({
+  date: z.string(),
   professionalId: z.number().default(1),
   startHour: z.preprocess(
     (value) => Number(value),
@@ -73,6 +74,7 @@ export function OpenDialog({ selectWorkingDay }: IOpenDialog) {
     reset,
   } = useForm<IFormData>({
     defaultValues: {
+      date: dayLib(selectWorkingDay.date).format('YYYY-MM-DD'),
       startHour: hours.at(-1),
       startMin: 0,
     },

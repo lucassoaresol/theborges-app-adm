@@ -26,6 +26,7 @@ import { useHome } from '../../useHome';
 
 const schema = z
   .object({
+    date: z.string(),
     professionalId: z.number().default(1),
     startHour: z.preprocess(
       (value) => Number(value),
@@ -94,7 +95,13 @@ export function ClosedOffDialog({ selectWorkingDay }: IClosedOffDialog) {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<IFormData>({
-    defaultValues: { startHour: hours[0], startMin: 0, endHour: hours[0], endMin: 0 },
+    defaultValues: {
+      date: dayLib(selectWorkingDay.date).format('YYYY-MM-DD'),
+      startHour: hours[0],
+      startMin: 0,
+      endHour: hours[0],
+      endMin: 0,
+    },
     resolver: zodResolver(schema),
   });
 

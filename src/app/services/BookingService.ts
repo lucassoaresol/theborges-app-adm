@@ -22,7 +22,7 @@ interface ICreateBookingDTO {
 
 interface IUpdateBookingDTO {
   id: number;
-  status: 'CANCELLED' | 'RESCHEDULED';
+  status: 'CANCELLED' | 'RESCHEDULED' | 'NO_SHOW';
 }
 
 export class BookingService {

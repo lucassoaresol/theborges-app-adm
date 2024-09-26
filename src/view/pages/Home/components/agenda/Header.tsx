@@ -12,7 +12,7 @@ interface IHeader {
 }
 
 export function Header({ selectWorkingDay }: IHeader) {
-  return dayLib(selectWorkingDay.date).isSame(dayLib(), 'day') ? (
+  return (
     <div className="w-full max-w-2xl flex items-center justify-between">
       <ScheduleDialog selectWorkingDay={selectWorkingDay} />
 
@@ -25,10 +25,6 @@ export function Header({ selectWorkingDay }: IHeader) {
           <GrScheduleNew />
         </Link>
       </Button>
-    </div>
-  ) : (
-    <div className="text-xl font-bold mb-4 text-center">
-      {dayLib(selectWorkingDay.date).format('DD/MM/YYYY')}
     </div>
   );
 }

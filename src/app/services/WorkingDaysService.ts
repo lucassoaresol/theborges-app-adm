@@ -3,6 +3,7 @@ import { IWorkingDay } from '@/app/entities/IWorkingDay';
 import { httpClient } from './httpClient';
 
 interface IUpdateWorkingDayDTO {
+  date: string;
   professionalId: number;
   start: number;
   end?: number;
@@ -30,8 +31,13 @@ export class WorkingDaysService {
     return data.result;
   }
 
-  static async updateWorkingDay({ end, professionalId, start }: IUpdateWorkingDayDTO) {
-    await httpClient.patch('/working-days', { end, professionalId, start });
+  static async updateWorkingDay({
+    date,
+    end,
+    professionalId,
+    start,
+  }: IUpdateWorkingDayDTO) {
+    await httpClient.patch('/working-days', { date, end, professionalId, start });
   }
 
   static async getFreeTime({
