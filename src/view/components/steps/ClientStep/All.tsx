@@ -17,7 +17,7 @@ import { NewClientStep } from '../NewClientStep/All';
 
 const schema = z.object({
   phone: z.string().min(2, 'O Whatsapp informado é inválido'),
-  phoneData: z.string().min(14, 'Whatsapp é obrigatório'),
+  phoneData: z.string().min(12, 'Whatsapp é obrigatório'),
 });
 
 type IFormData = z.infer<typeof schema>;
