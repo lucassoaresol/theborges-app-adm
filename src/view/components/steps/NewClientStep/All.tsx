@@ -44,7 +44,7 @@ interface INewClientAdmStep {
 }
 
 export function NewClientStep({ addCreate }: INewClientAdmStep) {
-  const { loading } = useVerifyPhone();
+  const { loading, verifyPhone } = useVerifyPhone();
   const { createError, create, update, updateLoading, createLoading } = useClients();
   const { nextStep } = useStepper();
   const form = useFormContext<FormData>();
@@ -69,33 +69,48 @@ export function NewClientStep({ addCreate }: INewClientAdmStep) {
     reset,
     getValues,
     setValue,
+    setError,
   } = formCreate;
 
-  const handleSubmit = hookFormSubmit((data) => {
-    if (form.getValues('clientStep.clientId')) {
-      update(
-        { id: form.getValues('clientStep.clientId'), ...data },
-        {
-          onSuccess: () => {
+  const handleSubmit = hookFormSubmit(async (data) => {
+    let isValid = false;
+
+    try {
+      await verifyPhone(data.phone);
+      isValid = true;
+    } catch {
+      setError('phoneData', {
+        type: 'validate',
+        message: 'O Whatsapp informado é inválido',
+      });
+    }
+
+    if (isValid) {
+      if (form.getValues('clientStep.clientId')) {
+        update(
+          { id: form.getValues('clientStep.clientId'), ...data },
+          {
+            onSuccess: () => {
+              reset();
+              setSelectData(undefined);
+              nextStep();
+            },
+          },
+        );
+      } else {
+        create(data, {
+          onSuccess: (cl) => {
             reset();
             setSelectData(undefined);
+            form.setValue('clientStep', {
+              clientId: cl.id,
+              name: cl.name,
+              phone: cl.phone,
+            });
             nextStep();
           },
-        },
-      );
-    } else {
-      create(data, {
-        onSuccess: (cl) => {
-          reset();
-          setSelectData(undefined);
-          form.setValue('clientStep', {
-            clientId: cl.id,
-            name: cl.name,
-            phone: cl.phone,
-          });
-          nextStep();
-        },
-      });
+        });
+      }
     }
   });
 

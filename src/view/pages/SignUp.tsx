@@ -25,7 +25,7 @@ const schema = z.object({
 type IFormData = z.infer<typeof schema>;
 
 export function SignUp() {
-  const { loading } = useVerifyPhone();
+  const { loading, verifyPhone } = useVerifyPhone();
   const form = useForm<IFormData>({
     resolver: zodResolver(schema),
   });
@@ -34,10 +34,25 @@ export function SignUp() {
     register,
     handleSubmit: hookFormSubmit,
     formState: { errors, isSubmitting },
+    setError,
   } = form;
 
   const handleSubmit = hookFormSubmit(async ({ name, password, phone, username }) => {
-    await AuthService.signUp({ name, password, phone, username });
+    let isValid = false;
+
+    try {
+      await verifyPhone(phone);
+      isValid = true;
+    } catch {
+      setError('phoneData', {
+        type: 'validate',
+        message: 'O Whatsapp informado é inválido',
+      });
+    }
+
+    if (isValid) {
+      await AuthService.signUp({ name, password, phone, username });
+    }
   });
 
   return (

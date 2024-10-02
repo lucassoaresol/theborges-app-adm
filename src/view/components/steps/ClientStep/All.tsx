@@ -23,7 +23,7 @@ const schema = z.object({
 type IFormData = z.infer<typeof schema>;
 
 export function ClientStep() {
-  const { loading } = useVerifyPhone();
+  const { loading, verifyPhone } = useVerifyPhone();
   const { nextStep } = useStepper();
   const [isClient, setIsClient] = useState(false);
   const [newClient, setNewClient] = useState(false);
@@ -36,30 +36,46 @@ export function ClientStep() {
     handleSubmit: hookFormSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setError,
   } = formGet;
 
   const form = useFormContext<FormData>();
 
   const handleSubmit = hookFormSubmit(async (data) => {
+    let isValid = false;
     setIsClient(true);
+
     try {
-      const client = await ClientService.getByPhone(data.phone);
-      form.setValue('clientStep', {
-        clientId: client.id,
-        name: client.name,
-        phone: client.phone,
-      });
-      reset();
-      if (!client.birthDay || !client.birthMonth) {
-        setNewClient(true);
-      } else {
-        nextStep();
-      }
+      await verifyPhone(data.phone);
+      isValid = true;
     } catch {
-      form.setValue('clientStep.phone', data.phone);
-      setNewClient(true);
-    } finally {
+      setError('phoneData', {
+        type: 'validate',
+        message: 'O Whatsapp informado é inválido',
+      });
       setIsClient(false);
+    }
+
+    if (isValid) {
+      try {
+        const client = await ClientService.getByPhone(data.phone);
+        form.setValue('clientStep', {
+          clientId: client.id,
+          name: client.name,
+          phone: client.phone,
+        });
+        reset();
+        if (!client.birthDay || !client.birthMonth) {
+          setNewClient(true);
+        } else {
+          nextStep();
+        }
+      } catch {
+        form.setValue('clientStep.phone', data.phone);
+        setNewClient(true);
+      } finally {
+        setIsClient(false);
+      }
     }
   });
 

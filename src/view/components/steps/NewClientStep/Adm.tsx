@@ -28,7 +28,7 @@ interface INewClientAdmStep {
 }
 
 export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
-  const { loading } = useVerifyPhone();
+  const { loading, verifyPhone } = useVerifyPhone();
   const { createError, create, createLoading } = useClients();
   const { nextStep } = useStepper();
   const form = useFormContext<FormData>();
@@ -42,21 +42,36 @@ export function NewClientAdmStep({ addCreate }: INewClientAdmStep) {
     handleSubmit: hookFormSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setError,
   } = formCreate;
 
-  const handleSubmit = hookFormSubmit((data) => {
-    create(data, {
-      onSuccess: (cl) => {
-        reset();
-        addCreate();
-        form.setValue('clientStep', {
-          clientId: cl.id,
-          name: cl.name,
-          phone: cl.phone,
-        });
-        nextStep();
-      },
-    });
+  const handleSubmit = hookFormSubmit(async (data) => {
+    let isValid = false;
+
+    try {
+      await verifyPhone(data.phone);
+      isValid = true;
+    } catch {
+      setError('phoneData', {
+        type: 'validate',
+        message: 'O Whatsapp informado é inválido',
+      });
+    }
+
+    if (isValid) {
+      create(data, {
+        onSuccess: (cl) => {
+          reset();
+          addCreate();
+          form.setValue('clientStep', {
+            clientId: cl.id,
+            name: cl.name,
+            phone: cl.phone,
+          });
+          nextStep();
+        },
+      });
+    }
   });
 
   return (

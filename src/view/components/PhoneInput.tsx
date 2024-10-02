@@ -1,14 +1,11 @@
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { useVerifyPhone } from '@/app/hooks/useVerifyPhone';
-
 import { Input } from './ui/Input';
 import { Label } from './ui/Label';
 
 export function PhoneInput() {
-  const { verifyPhone } = useVerifyPhone();
-  const { setValue, watch, register, setError, clearErrors } = useFormContext();
+  const { setValue, watch, register } = useFormContext();
 
   const normalizePhoneNumber = (value: string) => {
     if (!value) return '';
@@ -44,31 +41,18 @@ export function PhoneInput() {
   };
 
   useEffect(() => {
-    const subscription = watch(async (formData, { name }) => {
+    const subscription = watch(async (formData) => {
       const rawPhone = formData.phoneData ?? '';
-      const phone = formData.phone ?? '';
       const normalizedPhone = normalizePhoneNumber(rawPhone);
 
       if (rawPhone !== normalizedPhone) {
         setValue('phoneData', normalizedPhone);
         setValue('phone', extractPhoneNumber(normalizedPhone));
       }
-
-      if (name === 'phone' && phone.length >= 12) {
-        verifyPhone(phone)
-          .then(() => clearErrors('phoneData'))
-          .catch(() => {
-            setError('phoneData', {
-              type: 'validate',
-              message: 'O Whatsapp informado é inválido',
-            });
-            setValue('phone', '');
-          });
-      }
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, setValue, setError, clearErrors, verifyPhone]);
+  }, [watch, setValue]);
 
   return (
     <>
